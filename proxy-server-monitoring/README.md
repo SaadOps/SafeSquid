@@ -1,4 +1,3 @@
-Here's an enhanced README based on the provided conditions:
 
 ---
 
