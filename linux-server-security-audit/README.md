@@ -60,6 +60,7 @@ This Bash script automates both security audits and the server hardening process
 
 - A Linux server (Debian-based distribution recommended)
 - Root or sudo privileges
+- **Email Dependencies**: Ensure `mailx` or a similar package is installed for email alerts.
 
 ## Installation and Configuration
 
@@ -77,6 +78,17 @@ This Bash script automates both security audits and the server hardening process
 3. **Edit configuration files:**
    - `config/hardening_rules.sh`: Customize hardening measures.
    - `config/custom_checks.sh`: Add organization-specific security checks.
+
+4. **Check and Install Email Dependencies:**
+   - Verify if `mailx` is installed:
+     ```bash
+     dpkg -l | grep mailx
+     ```
+   - If `mailx` is not installed, install it:
+     ```bash
+     sudo apt-get install -y mailutils
+     ```
+   - Configure the `/etc/ssmtp/ssmtp.conf` file if you're using `ssmtp` for email sending.
 
 ## Usage
 
@@ -155,3 +167,8 @@ run_custom_checks() {
 - **Permission Denied Errors**: Ensure you're running the script with `sudo`.
 
 - **Script Fails to Modify Configuration Files**: Verify file existence and permissions.
+
+- **Email Alerts Not Sending**: Ensure that `mailx` is correctly configured and that your server can send emails.
+
+--- 
+
