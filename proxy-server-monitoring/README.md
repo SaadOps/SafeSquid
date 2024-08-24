@@ -18,6 +18,19 @@ This Bash script provides a comprehensive system resource monitoring dashboard f
 - Bash shell
 - Standard Linux utilities (ps, ss, df, top, free, systemctl)
 
+## Installation and Configuration
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/security-audit-hardening.git
+   cd security-audit-hardening
+   ```
+
+2. **Make the script executable:**
+   ```bash
+   chmod +x audit_hardening.sh
+   ```
+
 ## Usage
 
 1. Make the script executable:
@@ -54,14 +67,14 @@ The script refreshes the displayed information every 5 seconds.
 `./monitor.sh`  
 
 2. Monitor only CPU and memory:
-./monitor.sh -cpu -memory
+`./monitor.sh -cpu -memory`
 
 
 3. Check disk usage and network:
-./monitor.sh -disk -network
+`./monitor.sh -disk -network`
 
 4. Monitor processes and services:
-./monitor.sh -process -service
+`./monitor.sh -process -service`
 
 ## Output Sections
 
