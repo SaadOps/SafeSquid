@@ -129,6 +129,5 @@ This Bash script automates the security audit and hardening process for Linux se
 
 Both scripts are designed to be efficient, customizable, and user-friendly. They can be easily integrated into your server management practices to monitor system resources and ensure security compliance. Detailed instructions and examples are provided to help users get started quickly.
 
-For more information or to contribute, please visit the repository on GitHub.
 
 ---
