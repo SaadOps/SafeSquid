@@ -51,7 +51,7 @@ The script refreshes the displayed information every 5 seconds.
 
 1. View full dashboard:
 
-./monitor.sh    
+`./monitor.sh`  
 
 2. Monitor only CPU and memory:
 ./monitor.sh -cpu -memory
