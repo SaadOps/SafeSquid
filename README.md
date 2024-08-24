@@ -1,133 +1,174 @@
-# Comprehensive Bash Scripts for Server Monitoring and Security Hardening
+
+---
+
+# Security Audit and Server Hardening Script
 
 ## Overview
 
-This repository contains two Bash scripts developed to address different technical tasks:
+This Bash script automates both security audits and the server hardening process for Linux servers. It is modular and reusable, allowing easy deployment across multiple servers to ensure they meet stringent security standards. The script includes checks for common security vulnerabilities, IPv4/IPv6 configurations, public vs. private IP identification, and the implementation of recommended hardening measures.
 
-1. **Monitoring System Resources for a Proxy Server**
-2. **Automating Security Audits and Server Hardening on Linux Servers**
+## Features
 
-Each script is designed to perform specific functions, such as monitoring system resources or automating security audits, and can be customized and extended as needed. The scripts are modular, efficient, and come with comprehensive documentation to help users easily deploy and utilize them.
+- **User and Group Audits**
+  - Lists all users and groups on the server.
+  - Checks for users with UID 0 (root privileges) and reports any non-standard users.
+  - Identifies and reports users without passwords or with weak passwords.
 
----
+- **File and Directory Permissions Checks**
+  - Scans for files and directories with world-writable permissions.
+  - Checks `.ssh` directories for secure permissions.
+  - Reports files with SUID or SGID bits set, particularly on executables.
 
-## Set 1: Monitoring System Resources for a Proxy Server
+- **Service Audits**
+  - Lists all running services and checks for unnecessary or unauthorized services.
+  - Ensures that critical services (e.g., `sshd`, `iptables`) are running and properly configured.
+  - Checks that no services are listening on non-standard or insecure ports.
 
-### Description
+- **Firewall and Network Security Checks**
+  - Verifies that a firewall (e.g., `iptables`, `ufw`) is active and configured to block unauthorized access.
+  - Reports any open ports and their associated services.
+  - Checks for IP forwarding or other insecure network configurations.
 
-This Bash script provides a real-time dashboard for monitoring various system resources on a proxy server. It refreshes the data every few seconds and allows users to call specific parts of the dashboard individually using command-line switches.
+- **IP and Network Configuration Checks (IPv4/IPv6)**
+  - Identifies whether the server's IP addresses are public or private.
+  - Provides a summary of all IP addresses, specifying which are public and which are private.
+  - Ensures that sensitive services (e.g., SSH) are not exposed on public IPs unless required.
 
-### Features
+- **Security Updates and Patching**
+  - Checks for and reports available security updates or patches.
+  - Ensures the server is configured to receive and install security updates regularly.
 
-1. **Top 10 Most Used Applications**
-   - Displays the top 10 applications consuming the most CPU and memory.
+- **Log Monitoring**
+  - Checks for suspicious log entries that may indicate a security breach, such as multiple failed login attempts on SSH.
 
-2. **Network Monitoring**
-   - Shows the number of concurrent connections to the server.
-   - Displays packets in and out (in MB).
+- **Server Hardening Steps**
+  - **SSH Configuration**: Enforces key-based authentication, disables password-based logins, and ensures SSH keys are securely stored.
+  - Disables IPv6 if not required, following recommended guidelines.
+  - Secures the GRUB bootloader by setting a password to prevent unauthorized changes.
+  - Configures firewall rules, including default deny settings and specific port allowances.
+  - Implements unattended-upgrades to apply security updates automatically and remove unused packages.
 
-3. **Disk Usage**
-   - Displays the disk space usage by mounted partitions.
-   - Highlights partitions using more than 80% of the space.
+- **Custom Security Checks**
+  - Allows for the easy addition of custom security checks based on specific organizational policies.
+  - Includes a configuration file where custom checks can be defined and managed.
 
-4. **System Load**
-   - Shows the current load average for the system.
-   - Includes a breakdown of CPU usage (user, system, idle, etc.).
+- **Reporting and Alerting**
+  - Generates a summary report of the security audit and hardening process, highlighting issues needing attention.
+  - Optionally sends email alerts if critical vulnerabilities or misconfigurations are found.
 
-5. **Memory Usage**
-   - Displays total, used, and free memory.
-   - Shows swap memory usage.
+## Prerequisites
 
-6. **Process Monitoring**
-   - Displays the number of active processes.
-   - Shows the top 5 processes in terms of CPU and memory usage.
+- A Linux server (Debian-based distribution recommended)
+- Root or sudo privileges
+- **Email Dependencies**: Ensure `mailx` or a similar package is installed for email alerts.
 
-7. **Service Monitoring**
-   - Monitors the status of essential services like sshd, nginx/apache, iptables, etc.
+## Installation and Configuration
 
-8. **Custom Dashboard**
-   - Provides command-line switches to view specific parts of the dashboard (e.g., `-cpu`, `-memory`, `-network`).
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/SaadOps/SafeSquid.git
+   cd security-audit-hardening
+   ```
 
-### Performance Considerations
+2. **Make the script executable:**
+   ```bash
+   chmod +x audit_hardening.sh
+   ```
 
-- The script is designed to be efficient, with minimal impact on system performance.
-- Real-time data updates are handled with care to ensure smooth operation without overloading the server.
+3. **Edit configuration files:**
+   - `config/hardening_rules.sh`: Customize hardening measures.
+   - `config/custom_checks.sh`: Add organization-specific security checks.
 
-### Extensibility
+4. **Check and Install Email Dependencies:**
+   - Verify if `mailx` is installed:
+     ```bash
+     dpkg -l | grep mailx
+     ```
+   - If `mailx` is not installed, install it:
+     ```bash
+     sudo apt-get install -y mailutils
+     ```
+   - Configure the `/etc/ssmtp/ssmtp.conf` file if you're using `ssmtp` for email sending.
 
-The script is modular and can be easily extended to include additional monitoring features. Users can modify the script to fit specific needs by adding or customizing functions.
+## Usage
 
----
+Run the script with sudo privileges:
 
-## Set 2: Script for Automating Security Audits and Server Hardening on Linux Servers
+```bash
+sudo ./audit_hardening.sh
+```
 
-### Description
+The script will generate reports in the `reports/` directory, including a comprehensive `security_audit_report_YYYYMMDD.txt`.
 
-This Bash script automates the security audit and hardening process for Linux servers. It is designed to be reusable and modular, making it easy to deploy across multiple servers to ensure they meet stringent security standards.
+## Example Configuration Files
 
-### Features
+### `config/hardening_rules.sh`
+```bash
+#!/bin/bash
 
-1. **User and Group Audits**
-   - Lists all users and groups on the server.
-   - Checks for users with UID 0 (root privileges) and reports any non-standard users.
-   - Identifies and reports users without passwords or with weak passwords.
+disable_unnecessary_services() {
+    services_to_disable=("telnet" "rlogin" "rexec")
+    for service in "${services_to_disable[@]}"; do
+        systemctl disable $service 2>/dev/null
+        systemctl stop $service 2>/dev/null
+    done
+}
 
-2. **File and Directory Permissions**
-   - Scans for files and directories with world-writable permissions.
-   - Checks `.ssh` directories for secure permissions.
-   - Reports files with SUID or SGID bits set, particularly on executables.
+secure_ssh() {
+    sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+    sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+    systemctl restart sshd
+}
 
-3. **Service Audits**
-   - Lists all running services and checks for any unnecessary or unauthorized services.
-   - Ensures critical services (e.g., sshd, iptables) are running and properly configured.
-   - Checks that no services are listening on non-standard or insecure ports.
+disable_ipv6() {
+    echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+    sysctl -p
+}
 
-4. **Firewall and Network Security**
-   - Verifies that a firewall (e.g., iptables, ufw) is active and configured to block unauthorized access.
-   - Reports open ports and their associated services.
-   - Checks for and reports any IP forwarding or other insecure network configurations.
+configure_firewall() {
+    ufw default deny incoming
+    ufw default allow outgoing
+    ufw allow ssh
+    ufw enable
+}
+# Add more hardening functions as needed
+```
 
-5. **IP and Network Configuration Checks**
-   - Identifies whether the server's IP addresses are public or private.
-   - Provides a summary of all IP addresses assigned to the server, specifying which are public and which are private.
-   - Ensures that sensitive services (e.g., SSH) are not exposed on public IPs unless required.
+### `config/custom_checks.sh`
+```bash
+#!/bin/bash
 
-6. **Security Updates and Patching**
-   - Checks for and reports any available security updates or patches.
-   - Ensures that the server is configured to receive and install security updates regularly.
+run_custom_checks() {
+    # Check for .rhosts files
+    echo "Checking for .rhosts files..."
+    find / -name ".rhosts" -exec rm -f {} \;
 
-7. **Log Monitoring**
-   - Checks for any recent suspicious log entries that may indicate a security breach, such as too many login attempts on SSH.
+    # Check for weak SSL/TLS configurations
+    echo "Checking SSL/TLS configurations..."
+    grep -r "SSLProtocol" /etc/apache2/
+    grep -r "ssl_protocols" /etc/nginx/
 
-8. **Server Hardening Steps**
-   - SSH configuration for key-based authentication and disabling password-based login.
-   - Disabling IPv6 (if not required).
-   - Securing the bootloader with a password.
-   - Implementing recommended iptables rules.
+    # Check for world-writable files
+    echo "Checking for world-writable files..."
+    find / -type f -perm -2 -ls 2>/dev/null
 
-9. **Custom Security Checks**
-   - Allows the script to be easily extended with custom security checks based on specific organizational policies or requirements.
-   - Includes a configuration file where custom checks can be defined and managed.
+    # Add more custom checks as needed
+}
+```
 
-10. **Reporting and Alerting**
-    - Generates a summary report of the security audit and hardening process, highlighting any issues that need attention.
-    - Optionally, sends email alerts or notifications if critical vulnerabilities or misconfigurations are found.
+## Troubleshooting
 
-### Extensibility
+- **Command Not Found Errors**: Install required tools:
+  ```bash
+  sudo apt-get update
+  sudo apt-get install -y net-tools iptables ufw cracklib-runtime
+  ```
 
-- The script is modular and can be extended with additional security checks.
-- Users can define custom checks in the provided configuration file.
+- **Permission Denied Errors**: Ensure you're running the script with `sudo`.
 
-### Reporting
+- **Script Fails to Modify Configuration Files**: Verify file existence and permissions.
 
-- The script generates a comprehensive report that summarizes the findings of the security audit and hardening process.
-- Optional email alerts can be configured to notify administrators of critical issues.
+- **Email Alerts Not Sending**: Ensure that `mailx` is correctly configured and that your server can send emails.
 
----
+--- 
 
-## Conclusion
-
-Both scripts are designed to be efficient, customizable, and user-friendly. They can be easily integrated into your server management practices to monitor system resources and ensure security compliance. Detailed instructions and examples are provided to help users get started quickly.
-
-
----
