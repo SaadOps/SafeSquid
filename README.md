@@ -66,8 +66,8 @@ This Bash script automates both security audits and the server hardening process
 
 1. **Clone the repository:**
    ```bash
-   git clone https://github.com/SaadOps/SafeSquid.git
-   cd security-audit-hardening
+   git clone https://github.com/SaadOps/linux-server-security-audit.git
+   cd linux-server-security-audit
    ```
 
 2. **Make the script executable:**
