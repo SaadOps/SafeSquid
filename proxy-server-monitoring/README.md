@@ -33,20 +33,17 @@ This Bash script provides a comprehensive system resource monitoring dashboard f
 
 ## Usage
 
-1. Make the script executable:
-chmod +x monitor.sh
+- Run the script:
 
-2. Run the script:
+  - For full dashboard:
+    ```
+    ./monitor.sh
+    ```
 
-- For full dashboard:
-  ```
-  ./monitor.sh
-  ```
-
-- For specific parts of the dashboard:
-  ```
-  ./monitor.sh [-cpu] [-memory] [-network] [-disk] [-load] [-process] [-service]
-  ```
+  - For specific parts of the dashboard:
+    ```
+    ./monitor.sh [-cpu] [-memory] [-network] [-disk] [-load] [-process] [-service]
+    ```
 
 The script refreshes the displayed information every 5 seconds.
 
