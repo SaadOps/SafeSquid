@@ -28,7 +28,7 @@ secure_ssh() {
     # Set the SSH protocol to 2 (disabling SSHv1)
     sed -i 's/#Protocol 2/Protocol 2/' /etc/ssh/sshd_config
     
-    systemctl restart sshd
+    systemctl restart ssh || log "Error: Failed to restart SSH service."
     log "SSH configuration hardened."
 }
 
@@ -40,7 +40,12 @@ secure_grub() {
     grub_password=$(grub-mkpasswd-pbkdf2 | grep -oP '(?<=grub.pbkdf2.sha512.).*')
     echo "set superusers=\"root\"" >> /etc/grub.d/40_custom
     echo "password_pbkdf2 root ${grub_password}" >> /etc/grub.d/40_custom
-    update-grub
+    
+    # Use timeout to limit execution time
+    if ! timeout 10s bash -c 'update-grub'; then
+        log "GRUB security hardening was skipped or failed due to timeout."
+        return 1
+    fi
 
     log "GRUB bootloader secured."
 }
@@ -59,6 +64,11 @@ disable_ipv6() {
 # Function to configure and enforce firewall rules
 configure_firewall() {
     log "Configuring firewall rules..."
+
+    # Ensure iptables-persistent is installed
+    if ! dpkg -l | grep -q iptables-persistent; then
+        apt-get install iptables-persistent -y || log "Error: Failed to install iptables-persistent."
+    fi
 
     # Default policies
     iptables -P INPUT DROP
@@ -83,7 +93,7 @@ configure_firewall() {
     iptables -A OUTPUT -p udp --dport 53 -j ACCEPT
 
     # Save iptables rules
-    iptables-save > /etc/iptables/rules.v4
+    iptables-save > /etc/iptables/rules.v4 || log "Error: Failed to save iptables rules."
 
     log "Firewall rules configured."
 }
@@ -91,8 +101,8 @@ configure_firewall() {
 # Function to enable automatic security updates
 enable_unattended_upgrades() {
     log "Enabling unattended upgrades..."
-    apt-get install unattended-upgrades -y
-    dpkg-reconfigure --priority=low unattended-upgrades
+    apt-get install unattended-upgrades -y || log "Error: Failed to install unattended-upgrades."
+    dpkg-reconfigure --priority=low unattended-upgrades || log "Error: Failed to configure unattended-upgrades."
     log "Unattended upgrades enabled."
 }
 
@@ -103,3 +113,4 @@ remove_unused_packages() {
     apt-get autoclean -y
     log "Unused packages removed."
 }
+    
